@@ -1,0 +1,2 @@
+module SearchTerms
+end
