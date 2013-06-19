@@ -1,0 +1,7 @@
+    rails generate search_terms <context>
+
+The <context> is the both the context of the words (ie, names) and the table that is used to store them in the database. Typically you only need one context, and the default name is 'search_terms', so you would type: 
+
+    rails g search_terms
+    
+That will generate the search_terms migration + model.
