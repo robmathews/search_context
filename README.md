@@ -24,7 +24,7 @@ rails g search_terms some_other_search_terms
 
 ```rails
 class Author < ActiveRecord::Base
-  maintains_search_terms(:columns=>[:first_name, :last_name], :context=>:search_terms, :granularity=>:broken_by_word)
+  search_context([:first_name, :last_name], :context=>:search_terms, :granularity=>:broken_by_word)
 end
 ```
 context is the name of the table to use, multiple models can share the same table

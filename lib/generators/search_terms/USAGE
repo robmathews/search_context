@@ -5,8 +5,4 @@ The <context> is the both the context of the words (ie, names) and the table tha
     rails g search_terms
     
 That will generate the search_terms migration + model.
-
-If you want, you can add additional fields to the search terms table, so that you can scope the terms by some other attribute, like here:
-
-  rails g search_terms slang country_id:integer
   
