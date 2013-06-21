@@ -4,6 +4,9 @@ describe SearchTerm do
   let(:term_word2) {Faker::Name.first_name}
   let(:term1) {FactoryGirl.create(:search_term,:term=>term_word)}
   let(:term2) {FactoryGirl.create(:search_term,:term=>term_word2)}
+  before do
+    SearchTerm.delete_all
+  end
   it 'add a term' do
     expect{SearchTerm.add_terms(term_word)}.to change{SearchTerm.count}.by(1)
   end
@@ -25,6 +28,14 @@ describe SearchTerm do
     it 'not change unchanged terms' do
       term1
       expect{SearchTerm.update_terms([term1.term],[term1.term])}.to change{SearchTerm.count}.by(0)
+    end
+  end
+  describe 'find similar terms' do
+    before do
+      %W{bird brain brains brawn again brian bran buffalo batch}.each {|t|FactoryGirl.create(:search_term,:term=>t)}
+    end
+    it 'should find terms' do
+      puts SearchTerm.similar_to('brain').pluck(:term)
     end
   end
 end

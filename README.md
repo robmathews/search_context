@@ -35,7 +35,7 @@ granularity is either "broken_by_word" or "complete". This means that we'll eith
 
 Now you can query the search_terms table for similar words to any given word, for example this would return an active relation consisting of similar first names to 'Charlie'.
 
-    Author.mispellings_for('Charlie')
+    Author.search_terms_mispellings_for(:first_name,'Charlie')
     
 Under the covers, this is doing the following:
 

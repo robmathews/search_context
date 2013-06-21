@@ -35,6 +35,9 @@ module SearchTerms
             #{search_class}.delete_terms(*#{calculate_proc})
             true
           end
+          def #{context}_mispellings_for(column,term)
+            join("join #{context}.term % ?",column).where('#{context}.term % ?',term)
+          end
         end
         EOS
 
