@@ -19,7 +19,7 @@ class EnableTsearchGenerator < Rails::Generators::Base
     unless self.class.migration_exists?('db/migrate',"add_#{column_name}_to_#{table_name}")
       migration_template "add_column_migration.rb", "db/migrate/add_#{column_name}_to_#{table_name}.rb"
       migration_template "add_trigger_migration.rb", "db/migrate/add_#{context}_trigger_to_#{table_name}.rb"
-      migration_template "add_tsearch_index_migration.rb", "db/migrate/add_tsearch_index_to_#{table_name}.rb"
+      migration_template "add_tsearch_index_migration.rb", "db/migrate/add_#{context}_tsearch_index_to_#{table_name}.rb"
     end
   end
   

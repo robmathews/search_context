@@ -16,20 +16,20 @@ ActiveRecord::Schema.define(:version => 20130621211358) do
   create_table "authors", :force => true do |t|
     t.string   "first_name"
     t.string   "last_name"
-    t.datetime "created_at",          :null => false
-    t.datetime "updated_at",          :null => false
-    t.tsvector "search_terms_vector"
+    t.datetime "created_at",   :null => false
+    t.datetime "updated_at",   :null => false
+    t.tsvector "names_vector"
   end
 
-  add_index "authors", ["search_terms_vector"], :name => "idx_search_terms_vector_on_authors"
+  add_index "authors", ["names_vector"], :name => "idx_names_vector_on_authors"
 
-  create_table "search_terms", :force => true do |t|
+  create_table "names", :force => true do |t|
     t.string   "term"
     t.integer  "count"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
-  add_index "search_terms", ["term"], :name => "idx_trgm_on_search_terms"
+  add_index "names", ["term"], :name => "idx_trgm_on_name_words"
 
 end

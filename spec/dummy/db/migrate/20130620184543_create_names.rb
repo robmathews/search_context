@@ -1,6 +1,6 @@
-class CreateSearchTerms < ActiveRecord::Migration
+class CreateNames < ActiveRecord::Migration
   def change
-    create_table :search_terms do |t|
+    create_table :names do |t|
       t.string :term
       t.integer :count
       t.timestamps

@@ -1,5 +1,5 @@
 require 'search_context'
-class SearchTerm <ActiveRecord::Base
+class Name <ActiveRecord::Base
   attr_accessible :count, :term
   include SearchContext::Methods
 
@@ -10,7 +10,7 @@ class SearchTerm <ActiveRecord::Base
   module Query extend ActiveSupport::Concern
     included do
       scope :similar_to, lambda {|term1|
-       where("to_tsquery(?,?) @@ search_terms_vector",SearchTerm.search_config, SearchTerm.similar_terms(term1).join(' | '))
+       where("to_tsquery(?,?) @@ names_vector",Name.search_config, Name.similar_terms(term1).join(' | '))
       }
     end
   end
