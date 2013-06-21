@@ -10,7 +10,7 @@ class SearchTerm <ActiveRecord::Base
   module Query extend ActiveSupport::Concern
     included do
       scope :similar_to, lambda {|term1|
-       where("to_tsquery(?,?) @@ context_search_terms",SearchTerm.search_config, SearchTerm.similar_terms(term1).join(' | '))
+       where("to_tsquery(?,?) @@ search_terms_vector",SearchTerm.search_config, SearchTerm.similar_terms(term1).join(' | '))
       }
     end
   end

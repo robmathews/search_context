@@ -7,7 +7,7 @@ module SearchContext
       terms
     end
     module ClassMethods
-      def search_context(fields, options={})
+      def search_context(fields_or_method, options={})
         context = options[:context] ||= :search_terms
         options[:granularity]||=:broken_by_word
         search_class = context.to_s.singularize.camelize
@@ -16,7 +16,21 @@ module SearchContext
         create_proc = "create_#{context}".to_sym
         update_proc = "update_#{context}".to_sym
         destroy_proc = "destroy_#{context}".to_sym
-        calculate_proc = "calculate_#{context}"
+        if fields_or_method.kind_of? Symbol
+          calculate_proc = fields_or_method
+        elsif fields_or_method.kind_of? Array
+          calculate_proc = "calculate_#{context}"
+          eval <<-EOS
+          class_eval do
+            # override this method if you want to calculate your search terms in some other way, like perhaps joining to a parent record and getting some addition search terms from there
+            def #{calculate_proc}
+              calculate_search_terms_helper(#{fields_or_method},#{options[:granularity]==:broken_by_word})
+            end
+          end
+          EOS
+        else
+          raise ArgumentError,'pass in either a list of database fields, or a method to use to calculate the search terms'
+        end
          eval <<-EOS
         class_eval do
           include #{search_class}::Query
@@ -40,14 +54,11 @@ module SearchContext
             join("join #{context}.term % ?",column).where('#{context}.term % ?',term)
           end
           
-          # override this method if you want to calculate your search terms in some other way, like perhaps joining to a parent record and getting some addition search terms from there
-          def #{calculate_proc}
-            calculate_search_terms_helper(#{fields},#{options[:granularity]==:broken_by_word})
-          end
         end
         EOS
 
         after_find cache_proc
+        before_save calculate_proc
         after_save cache_proc
         after_create create_proc
         after_update update_proc

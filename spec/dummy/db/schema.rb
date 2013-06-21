@@ -11,14 +11,17 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130620184544) do
+ActiveRecord::Schema.define(:version => 20130621211358) do
 
   create_table "authors", :force => true do |t|
     t.string   "first_name"
     t.string   "last_name"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",          :null => false
+    t.datetime "updated_at",          :null => false
+    t.tsvector "search_terms_vector"
   end
+
+  add_index "authors", ["search_terms_vector"], :name => "idx_search_terms_vector_on_authors"
 
   create_table "search_terms", :force => true do |t|
     t.string   "term"

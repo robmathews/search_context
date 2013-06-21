@@ -1,0 +1,12 @@
+    rails generate enable_tsearch <table> <context> <col1> <col2> ...
+
+This would generate the following
+
+1. migration to add a context_vector column to table
+2. migration to create a trigger that updates the context_vector column from <col1> <col2> ... whenever <table> is inserted or updated.
+
+The migration to create the trigger is only an example, it'll work for simple cases but you'd need to edit it to create more complex and useful triggers, for example
+if you needed to join to a remote table to get some columns from there.
+
+
+  
