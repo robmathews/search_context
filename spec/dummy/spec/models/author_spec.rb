@@ -6,7 +6,7 @@ describe Author do
   end
   let(:record) {Author.new(:first_name=>'Joe', :last_name=>'Saint John')}
   it 'should calculate_search_terms' do
-    record.calculate_search_terms([:first_name, :last_name],true).should == ['joe','saint','john']
+    record.calculate_search_terms.should == ['joe','saint','john']
   end
   it 'should save search terms' do
     expect{record.save!}.to change{SearchTerm.count}.by(3)
@@ -29,5 +29,16 @@ describe Author do
     tmp.save!
     SearchTerm.where(:term=>'mac').should_not be_empty
     SearchTerm.where(:term=>'joe').should be_empty
+  end
+  describe 'finding stuff - basic' do
+    before do
+      record.save!
+    end
+    it 'understand similar_to' do
+      Author.similar_to('joe').should_not be_empty
+    end
+    it 'scopes compose'do
+      Author.where('created_at > ?',1.day.ago).similar_to('joe').should_not be_empty
+    end
   end
 end

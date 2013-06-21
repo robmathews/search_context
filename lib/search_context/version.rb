@@ -1,3 +1,3 @@
-module SearchTerms
+module SearchContext
   VERSION = "0.0.1"
 end

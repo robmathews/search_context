@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    search_terms (0.0.1)
+    search_context (0.0.1)
       pg (~> 0.14.1)
       rails (~> 3.2.13)
 
@@ -127,5 +127,5 @@ DEPENDENCIES
   jquery-rails
   pg (~> 0.14.1)
   rspec-rails
-  search_terms!
+  search_context!
   test-unit

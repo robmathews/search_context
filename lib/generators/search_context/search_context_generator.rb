@@ -2,7 +2,7 @@ require 'rails/generators'
 require 'rails/generators/active_model'
 require 'rails/generators/migration'
 
-class SearchTermsGenerator < Rails::Generators::Base  
+class SearchContextGenerator < Rails::Generators::Base  
   include Rails::Generators::Migration
   source_root File.expand_path('../templates', __FILE__)  
   argument :context, :type => :string, :default => "search_terms"  
