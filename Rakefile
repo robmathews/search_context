@@ -34,5 +34,6 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = false
 end
 
-
+# include the dummy app rake tasks, so that you can create a test db etc from the root.
+import 'spec/dummy/Rakefile'
 task :default => :test

@@ -35,7 +35,7 @@ describe SearchTerm do
       %W{bird brain brains brawn again brian bran buffalo batch}.each {|t|FactoryGirl.create(:search_term,:term=>t)}
     end
     it 'should find terms' do
-      puts SearchTerm.similar_to('brain').pluck(:term)
+      SearchTerm.similar_to('brain').pluck(:term).should == %W{brain brains brawn bran}
     end
   end
 end
