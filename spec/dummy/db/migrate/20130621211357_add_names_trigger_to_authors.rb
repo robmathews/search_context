@@ -5,8 +5,8 @@ class AddNamesTriggerToAuthors < ActiveRecord::Migration
     CREATE OR REPLACE FUNCTION sp_update_names_vector() RETURNS trigger AS $$
     begin
       new.names_vector :=
-                  setweight(to_tsvector('pg_catalog.english', coalesce(new.first_name,'')), 'A')
-                              || setweight(to_tsvector('pg_catalog.english', coalesce(new.last_name,'')), 'A')
+                  setweight(to_tsvector('names_search_config', coalesce(new.first_name,'')), 'A')
+                              || setweight(to_tsvector('names_search_config', coalesce(new.last_name,'')), 'A')
                   ;
       return new;
     end

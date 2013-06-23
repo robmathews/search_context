@@ -6,7 +6,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration
     begin
       new.<%=column_name %> :=
       <% sep='';columns.each do |column| -%>
-            <%=sep%>setweight(to_tsvector('pg_catalog.english', coalesce(new.<%=column %>,'')), 'A')
+            <%=sep%>setweight(to_tsvector(<%=search_config_name %>, coalesce(new.<%=column %>,'')), 'A')
             <%sep='|| ' -%>
       <% end -%>;
       return new;

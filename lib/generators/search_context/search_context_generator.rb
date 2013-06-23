@@ -1,11 +1,12 @@
 require 'rails/generators'
 require 'rails/generators/active_model'
 require 'rails/generators/migration'
+require 'generators/generator_helpers.rb'
 
 class SearchContextGenerator < Rails::Generators::Base  
   include Rails::Generators::Migration
   source_root File.expand_path('../templates', __FILE__)  
-  argument :context, :type => :string, :default => "search_terms"  
+  argument :context, :type => :string, :banner => "<context-name>"  
   
   def self.next_migration_number(path)
       sleep(1) # force a new timestamp
@@ -13,23 +14,36 @@ class SearchContextGenerator < Rails::Generators::Base
   end
     
   def create_context
-    unless self.class.migration_exists?('db/migrate','install_trigram_extension')
-      migration_template "install_migration.rb", "db/migrate/install_trigram_extension.rb"
-    end
-    unless self.class.migration_exists?('db/migrate',"create_#{table_name}")
-      template 'model.rb', "app/models/#{model_name}.rb"
-      migration_template "create_model_migration.rb", "db/migrate/create_#{table_name}.rb"
-      migration_template "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
-    end
+    migrate_if_needed "install_migration.rb", "db/migrate/install_trigram_extension.rb"
+    template 'model.rb', "app/models/#{model_file_name}.rb"
+    migrate_if_needed "create_model_migration.rb", "db/migrate/create_#{table_name}.rb"
+    migrate_if_needed "create_search_config_migration.rb", "db/migrate/add_#{search_config_name}.rb"
+    migrate_if_needed "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
+    migrate_if_needed "create_aliases_migration.rb", "db/migrate/create_#{aliases_name}.rb"
   end
   
   protected
-  def class_name
-    model_name.camelize
+
+  def column_name
+    "#{context}_vector"
   end
-  def model_name
+
+  def class_name
+    model_file_name.camelize
+  end
+
+  def model_file_name
     context.underscore.singularize
   end
+
+  def search_config_name
+    "#{table_name}_search_config"
+  end
+
+  def aliases_name
+    "#{table_name.singularize}_aliases"
+  end
+
   def table_name
     context.underscore.pluralize
   end
