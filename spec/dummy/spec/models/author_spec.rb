@@ -41,4 +41,19 @@ describe Author do
       Author.where('created_at > ?',1.day.ago).similar_to('joe').should_not be_empty
     end
   end
+  describe 'aliases' do
+    before do
+      ActiveRecord::Base.connection.execute 'delete from name_aliases'
+      record.save!
+      {'joseph'=>'joe','mr'=>''}.each_pair do |k,v|
+        ActiveRecord::Base.connection.execute("INSERT INTO name_aliases(original, substitution,created_at,updated_at) VALUES (to_tsquery('names_search_config','#{k}'),to_tsquery('names_search_config','#{v}'),localtimestamp, localtimestamp)")
+      end
+    end
+    it 'synonyms' do
+      Author.similar_to('joseph').should_not be_empty
+    end
+    it 'stop words' do
+      Author.similar_to('mr Mr joe Saint John').should_not be_empty
+    end
+  end
 end
