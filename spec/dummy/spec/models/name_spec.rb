@@ -4,7 +4,7 @@ describe Name do
   let(:term_word2) {Faker::Name.first_name}
   let(:term1) {FactoryGirl.create(:name,:term=>term_word)}
   let(:term2) {FactoryGirl.create(:name,:term=>term_word2)}
-  before do
+    before do
     Name.delete_all
   end
   it 'add a term' do
@@ -35,7 +35,7 @@ describe Name do
       %W{bird brain brains brawn again brian bran buffalo batch}.each {|t|FactoryGirl.create(:name,:term=>t)}
     end
     it 'should find terms' do
-      Name.similar_to('brain').pluck(:term).should == %W{brain brains brawn bran}
+      Name.similar_to('brain').pluck(:term).should == %W{brain brains bran brawn }
     end
   end
 end

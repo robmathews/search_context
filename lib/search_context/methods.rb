@@ -3,7 +3,8 @@ module SearchContext
   module Methods extend ActiveSupport::Concern
     included do 
       scope :similar_to, lambda {|term|
-        where("similarity(#{table_name}.term::text,?::text) > ? and abs(length(#{table_name}.term) - length(?)) <2",term,similarity_limit,term)
+        where("similarity(#{table_name}.term::text,?::text) > ? and abs(length(#{table_name}.term) - length(?)) <2",term,similarity_limit,term).
+        order("similarity(#{table_name}.term::text,#{sanitize(term)}::text) desc")
       }
     end
 
