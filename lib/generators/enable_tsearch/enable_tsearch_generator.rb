@@ -19,6 +19,8 @@ class EnableTsearchGenerator < Rails::Generators::Base
     migrate_if_needed("add_column_migration.rb","db/migrate/add_#{column_name}_to_#{table_name}.rb")
     migrate_if_needed("add_trigger_migration.rb", "db/migrate/add_#{context}_trigger_to_#{table_name}.rb")
     migrate_if_needed("add_tsearch_index_migration.rb", "db/migrate/add_#{context}_tsearch_index_to_#{table_name}.rb")
+    migrate_if_needed("populate_vector_migration.rb", "db/migrate/populate_#{column_name}_on_#{table_name}.rb")
+    migrate_if_needed("populate_search_terms_migration.rb", "db/migrate/populate_#{context}_from_#{table_name}.rb")
   end
   
   protected

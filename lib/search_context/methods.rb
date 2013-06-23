@@ -3,7 +3,7 @@ module SearchContext
   module Methods extend ActiveSupport::Concern
     included do 
       scope :similar_to, lambda {|term|
-        where("similarity(#{table_name}.term::text,?::text) > ?",term,similarity_limit)
+        where("similarity(#{table_name}.term::text,?::text) > ? and abs(length(#{table_name}.term) - length(?)) <2",term,similarity_limit,term)
       }
     end
 
@@ -24,7 +24,7 @@ module SearchContext
       end
       # default definition of similarity, you can override this in the class if needed
       def similarity_limit
-        0.3
+        0.27
       end
       def similar_terms(term)
         similar_to(term).pluck(:term)

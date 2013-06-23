@@ -37,6 +37,9 @@ describe Author do
     it 'understand similar_to' do
       Author.similar_to('joe').should_not be_empty
     end
+    it 'understand similar_to for slight differences' do
+      Author.similar_to('joee').should_not be_empty
+    end
     it 'scopes compose'do
       Author.where('created_at > ?',1.day.ago).similar_to('joe').should_not be_empty
     end
