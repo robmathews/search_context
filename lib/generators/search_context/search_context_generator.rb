@@ -16,6 +16,7 @@ class SearchContextGenerator < Rails::Generators::Base
   def create_context
     migrate_if_needed "install_migration.rb", "db/migrate/install_trigram_extension.rb"
     template 'model.rb', "app/models/#{model_file_name}.rb"
+    template 'alias.rb', "app/models/#{aliases_name}.rb"
     migrate_if_needed "create_model_migration.rb", "db/migrate/create_#{table_name}.rb"
     migrate_if_needed "create_search_config_migration.rb", "db/migrate/add_#{search_config_name}.rb"
     migrate_if_needed "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
@@ -43,6 +44,10 @@ class SearchContextGenerator < Rails::Generators::Base
   def aliases_name
     "#{table_name.singularize}_aliases"
   end
+
+  def aliases_class_name
+     "#{aliases_name.singularize.camelize}"
+   end
 
   def table_name
     context.underscore.pluralize

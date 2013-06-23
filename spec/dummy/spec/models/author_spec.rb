@@ -46,10 +46,10 @@ describe Author do
   end
   describe 'aliases' do
     before do
-      ActiveRecord::Base.connection.execute 'delete from name_aliases'
+      NameAlias.delete_all
       record.save!
       {'joseph'=>'joe','mr'=>''}.each_pair do |k,v|
-        ActiveRecord::Base.connection.execute("INSERT INTO name_aliases(original, substitution,created_at,updated_at) VALUES (to_tsquery('names_search_config','#{k}'),to_tsquery('names_search_config','#{v}'),localtimestamp, localtimestamp)")
+        NameAlias.create!(:original=>k,:substitution=>v)
       end
     end
     it 'synonyms' do
