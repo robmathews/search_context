@@ -1,7 +1,8 @@
 require 'search_context'
 class <%= class_name %> <ActiveRecord::Base
   include SearchContext::Methods
-  attr_accessible :count, :term
+  attr_accessible <%if include_count -%>
+    :count,<%end%> :name
   
   # override the search_config if you are using some other search configuration
   def self.search_config
@@ -17,7 +18,7 @@ class <%= class_name %> <ActiveRecord::Base
                         'SELECT t,s FROM aliases WHERE ''a & b''::tsquery @> t')
       scope :similar_to, lambda {|term1|
        similar_terms = <%= class_name %>.similar_terms(term1).join(' | ')
-       where("ts_rewrite(to_tsquery(?,?),'select original,substitution from <%=aliases_name%> WHERE to_tsquery('?','?') @>original') @@ <%=column_name%>",
+       where("ts_rewrite(to_tsquery(?,?),'select original_tsquery,substitution_tsquery from <%=aliases_name%> WHERE to_tsquery('?','?') @>original_tsquery') @@ <%=column_name%>",
            <%= class_name %>.search_config,similar_terms,
            <%= class_name %>.search_config, similar_terms)
       }

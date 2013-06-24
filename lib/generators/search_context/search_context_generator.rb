@@ -6,7 +6,9 @@ require 'generators/generator_helpers.rb'
 class SearchContextGenerator < Rails::Generators::Base  
   include Rails::Generators::Migration
   source_root File.expand_path('../templates', __FILE__)  
-  argument :context, :type => :string, :banner => "<context-name>"  
+  argument :context, :type => :string, :banner => "<context-name>"
+  class_option :include_count, :type => :boolean, :default => false, :description => "include count"
+   
   
   def self.next_migration_number(path)
       sleep(1) # force a new timestamp
@@ -21,6 +23,7 @@ class SearchContextGenerator < Rails::Generators::Base
     migrate_if_needed "create_search_config_migration.rb", "db/migrate/add_#{search_config_name}.rb"
     migrate_if_needed "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
     migrate_if_needed "create_aliases_migration.rb", "db/migrate/create_#{aliases_name}.rb"
+    migrate_if_needed "add_aliases_trigger_migration.rb", "db/migrate/add_#{aliases_name}_trigger.rb"
   end
   
   protected
@@ -55,4 +58,13 @@ class SearchContextGenerator < Rails::Generators::Base
   def index_name
     "idx_trgm_on_#{table_name}"    
   end
+  
+  def trigger_name
+    "trigger_update_#{aliases_name}"    
+  end
+
+  def trigger_sp_name
+    "sp_update_#{aliases_name}"    
+  end
+  
 end

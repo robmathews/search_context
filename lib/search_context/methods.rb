@@ -2,9 +2,9 @@ require 'active_support/concern'
 module SearchContext
   module Methods extend ActiveSupport::Concern
     included do 
-      scope :similar_to, lambda {|term|
-        where("similarity(#{table_name}.term::text,?::text) > ? and abs(length(#{table_name}.term) - length(?)) <2",term,similarity_limit,term).
-        order("similarity(#{table_name}.term::text,#{sanitize(term)}::text) desc")
+      scope :similar_to, lambda {|name|
+        where("similarity(#{table_name}.name::text,?::text) > ? and abs(length(#{table_name}.name) - length(?)) <2",name,similarity_limit,name).
+        order("similarity(#{table_name}.name::text,#{sanitize(name)}::text) desc")
       }
     end
 
@@ -15,20 +15,20 @@ module SearchContext
         add_terms(*(new_terms - old_terms))
       end
       def delete_terms(*terms)
-        where(:term=>terms).update_all("count=count-1")
-        where(:term=>terms,:count=>0).delete_all
+        where(:name=>terms).update_all("count=count-1")
+        where(:name=>terms,:count=>0).delete_all
       end
       def add_terms(*terms)
-        where(:term=>terms).update_all("count=count+1")
-        new_terms = terms - self.where(:term=>terms).pluck(:term)
-        new_terms.each {|term| self.create!(:count=>1,:term=>term)}
+        where(:name=>terms).update_all("count=count+1")
+        new_terms = terms - self.where(:name=>terms).pluck(:name)
+        new_terms.each {|name| self.create!(:count=>1,:name=>name)}
       end
       # default definition of similarity, you can override this in the class if needed
       def similarity_limit
         0.27
       end
-      def similar_terms(term)
-        similar_to(term).pluck(:term)
+      def similar_terms(name)
+        similar_to(name).pluck(:name)
       end
     end
   end

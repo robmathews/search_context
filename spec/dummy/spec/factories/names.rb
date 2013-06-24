@@ -2,7 +2,7 @@
 
 FactoryGirl.define do
   factory :name do
-      term { Faker::Name.first_name }
+      name { Faker::Name.first_name }
       count 1
     end
 end

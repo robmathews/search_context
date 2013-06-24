@@ -3,7 +3,7 @@ class PopulateNamesFromAuthors < ActiveRecord::Migration
       execute(%Q{drop table if exists term_vectors})
       execute <<-EOS
        -- DELETE from #<Binding:0x007fe566200618>;
-       INSERT into names(term, count, created_at, updated_at)
+       INSERT into names(name, count, created_at, updated_at)
        SELECT word, ndoc as count, now() as created_at, now() as updated_at
        FROM ts_stat(
        'SELECT to_tsvector(''simple'',

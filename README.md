@@ -6,7 +6,7 @@ Maintain a trigram index of valid search terms associated with a model, plus oth
 
 ## To install: 
 
-Generate a context (default is in the table search_terms, but you have have multiple contexts if needed.)
+Generate a context (default is in the table search_terms, but you have have multiple contexts if needed.) A context can be shared between several different models.
 
 ```bash
 rails g search_context
@@ -18,6 +18,29 @@ Or run it again with a context name if you need to create multiple search contex
 ```bash
 rails g search_context some_other_search_terms
 ```
+
+There are basically two ways that the contents of a search_context can be managed: 
+
+1. dynamically
+2. statically
+
+In the dynamic option, every model that uses the search_context contributes terms to it, adding the terms as they are created, removing them as they are deleted. The search_context keeps a count column, and removes terms that have reached a count of zero. An example of this would be a list of names, where the names are created on the fly by the tables using this search context
+
+In contrast, the static option implements a lookup table with fuzzy search. In the static option, the search_context has been populated from some other source. There is no "count" column, and models using this context do not update the search_context on save. An example of this would be a list of countries in the world. You want to be able to search this and check for misspellings, but not so much delete a country if it isn't currently being used in the system.
+
+### dynamic
+
+* Specify --dynamic when generating the search context
+* content will be populated automatically
+
+### static
+
+* this is a lookup table
+* you need to load the content yourself somehow.
+
+### Options
+
+--dynamic (default false, enables the count column)
 
 ## In your model 
 
@@ -38,8 +61,8 @@ Now you can query the search_terms table for similar words to any given word, fo
     
 Under the covers, this is doing the following:
 
-    Author.join("join search_terms.term % first_name").where('search_terms.term % ?','Charlie')
-    
+    Author.join("join search_terms.name % first_name").where('search_terms.name % ?','Charlie')
+        
 ## tsearch
 
 Tsearch is supported by using a dedicated tsvector column on the table. The reasons for this choice is primarily that this approach allows the search document for the model to pull in data from related classes. For example, if you have a Book model, you might want to be to pull the authors name into the search document for the book, so that you could find all books by that author in the same search.

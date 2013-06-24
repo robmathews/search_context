@@ -19,16 +19,16 @@ describe Author do
     record.save!
     record.first_name = 'Mac'
     record.save!
-    Name.where(:term=>'mac').should_not be_empty
-    Name.where(:term=>'joe').should be_empty
+    Name.where(:name=>'mac').should_not be_empty
+    Name.where(:name=>'joe').should be_empty
   end
   it 'should update search terms for a find' do
     record.save!
     tmp = Author.find(record.id)
     tmp.first_name = 'Mac'
     tmp.save!
-    Name.where(:term=>'mac').should_not be_empty
-    Name.where(:term=>'joe').should be_empty
+    Name.where(:name=>'mac').should_not be_empty
+    Name.where(:name=>'joe').should be_empty
   end
   describe 'finding stuff - basic' do
     before do

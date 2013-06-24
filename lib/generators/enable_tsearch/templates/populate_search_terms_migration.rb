@@ -3,7 +3,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration
       execute(%Q{drop table if exists term_vectors})
       execute <<-EOS
        -- DELETE from <%=context %>;
-       INSERT into <%=context %>(term, count,created_at, updated_at)
+       INSERT into <%=context %>(name, count,created_at, updated_at)
        SELECT word, ndoc as count, now() as created_at, now() as updated_at
        FROM ts_stat(
        'SELECT to_tsvector(''simple'',

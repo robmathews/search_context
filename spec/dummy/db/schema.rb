@@ -27,12 +27,12 @@ ActiveRecord::Schema.define(:version => 20130623152929) do
 #   Unknown type 'tsquery' for column 'original'
 
   create_table "names", :force => true do |t|
-    t.string   "term"
+    t.string   "name"
     t.integer  "count"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
-  add_index "names", ["term"], :name => "idx_trgm_on_name_words"
+  add_index "names", ["name"], :name => "idx_trgm_on_name_words"
 
 end
