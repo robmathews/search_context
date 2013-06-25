@@ -7,7 +7,7 @@ class SearchContextGenerator < Rails::Generators::Base
   include Rails::Generators::Migration
   source_root File.expand_path('../templates', __FILE__)  
   argument :context, :type => :string, :banner => "<context-name>"
-  class_option :include_count, :type => :boolean, :default => false, :description => "include count"
+  class_option :dynamic, :type => :boolean, :default => false, :description => "include count so that the search context can be maintained dynamically"
    
   
   def self.next_migration_number(path)
@@ -18,7 +18,7 @@ class SearchContextGenerator < Rails::Generators::Base
   def create_context
     migrate_if_needed "install_migration.rb", "db/migrate/install_trigram_extension.rb"
     template 'model.rb', "app/models/#{model_file_name}.rb"
-    template 'alias.rb', "app/models/#{aliases_name}.rb"
+    template 'alias.rb', "app/models/#{aliases_file_name}.rb"
     migrate_if_needed "create_model_migration.rb", "db/migrate/create_#{table_name}.rb"
     migrate_if_needed "create_search_config_migration.rb", "db/migrate/add_#{search_config_name}.rb"
     migrate_if_needed "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
@@ -42,6 +42,10 @@ class SearchContextGenerator < Rails::Generators::Base
 
   def search_config_name
     "#{table_name}_search_config"
+  end
+
+  def aliases_file_name
+    "#{table_name.singularize}_alias"
   end
 
   def aliases_name

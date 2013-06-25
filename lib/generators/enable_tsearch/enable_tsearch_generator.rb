@@ -16,6 +16,9 @@ class EnableTsearchGenerator < Rails::Generators::Base
   end
     
   def create_context
+    tmp = "  search_context [#{columns.join(',')}], :context=>:#{context}\n" unless columns.empty?
+    tmp = "  search_context :a_method_that_returns_the_search_terms, :context=>:#{context}\n" if columns.empty?
+    inject_into_file "app/models/#{table_name.singularize}.rb", tmp , :after => /class #{table_name.singularize.camelize} < .*\n/
     migrate_if_needed("add_column_migration.rb","db/migrate/add_#{column_name}_to_#{table_name}.rb")
     migrate_if_needed("add_trigger_migration.rb", "db/migrate/add_#{context}_trigger_to_#{table_name}.rb")
     migrate_if_needed("add_tsearch_index_migration.rb", "db/migrate/add_#{context}_tsearch_index_to_#{table_name}.rb")

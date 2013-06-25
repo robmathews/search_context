@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130623152929) do
+ActiveRecord::Schema.define(:version => 20130625023142) do
 
   create_table "authors", :force => true do |t|
     t.string   "first_name"
@@ -22,6 +22,13 @@ ActiveRecord::Schema.define(:version => 20130623152929) do
   end
 
   add_index "authors", ["names_vector"], :name => "idx_names_vector_on_authors"
+
+  create_table "foos", :force => true do |t|
+    t.string   "field1"
+    t.string   "field2"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
 # Could not dump table "name_aliases" because of following StandardError
 #   Unknown type 'tsquery' for column 'original'

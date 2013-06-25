@@ -1,5 +1,7 @@
     rails generate enable_tsearch <table> <context> <col1> <col2> ...
 
+This assumes that you have already created a search_context using 'rails g search_context ...' and want to enable using that search_context from this related model.
+
 This would generate the following
 
 1. migration to add a context_vector column to table
