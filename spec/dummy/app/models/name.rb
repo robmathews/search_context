@@ -1,7 +1,7 @@
 require 'search_context'
 class Name <ActiveRecord::Base
   include SearchContext::Methods
-  attr_accessible :count, :name
+  attr_accessible     :count, :name
   
   # override the search_config if you are using some other search configuration
   def self.search_config
@@ -14,10 +14,9 @@ class Name <ActiveRecord::Base
       # this example demostrates synonyms and stop words implemented via the aliases table, which you have to figure out
       # how to populate on your own
       scope :similar_to, lambda {|term1|
-       # need to include the original name in the query in case there is a synonym for that name in the rewrite rules
        similar_terms= term1.split(/ +/).inject([]) do |acc, name| [name].concat(Name.similar_terms(name).uniq) end.flatten.join(' | ')
-       where("ts_rewrite(to_tsquery(?,?),'select original,substitution from name_aliases WHERE to_tsquery('?','?') @>original') @@ names_vector",
-           Name.search_config, similar_terms,
+       where("ts_rewrite(to_tsquery(?,?),'select original_tsquery,substitution_tsquery from name_aliases WHERE to_tsquery('?','?') @>original_tsquery') @@ names_vector",
+           Name.search_config,similar_terms,
            Name.search_config, similar_terms)
       }
     end

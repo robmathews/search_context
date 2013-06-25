@@ -13,10 +13,8 @@ class Varietal <ActiveRecord::Base
     included do
       # this example demostrates synonyms and stop words implemented via the aliases table, which you have to figure out
       # how to populate on your own
-      ts_rewrite('a & b'::tsquery,
-                        'SELECT t,s FROM aliases WHERE ''a & b''::tsquery @> t')
       scope :similar_to, lambda {|term1|
-       similar_terms = Varietal.similar_terms(term1).join(' | ')
+       similar_terms= term1.split(/ +/).inject([]) do |acc, name| [name].concat(Varietal.similar_terms(name).uniq) end.flatten.join(' | ')
        where("ts_rewrite(to_tsquery(?,?),'select original_tsquery,substitution_tsquery from varietal_aliases WHERE to_tsquery('?','?') @>original_tsquery') @@ varietals_vector",
            Varietal.search_config,similar_terms,
            Varietal.search_config, similar_terms)

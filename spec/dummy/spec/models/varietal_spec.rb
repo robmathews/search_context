@@ -2,19 +2,17 @@ require 'spec_helper'
 require 'transliterate'
 describe Varietal do
   
-  describe 'should find similar varietal' do
+  describe 'fuzzy matching' do
     SYNONYMS = {
      'zinfandel' => [ 'zin','zinfand', 'zinfande','zinfandale'  ,'zinfandel'  ,'zinfandell'  ,'zinfandels'  ,'zinfandil'  ,'zinfandl' ,
-     'zinfandwl'  ,'zinfanf'  ,'zinfanfel'  ,'zinfanndel'  ,'zinfans'  ,'zinfansekl'  ,'zinfedal',
+     'zinfandwl'  ,'zinfanfel'  ,'zinfanndel'  ,'zinfansekl'  ,'zinfedal',
      'zinfedel'  ,'zinfemdel'  ,'zinfendale'  ,'zinfendel'  ,'zinfendell'  ,'zinfidal'  ,'zinfidel' ,
      'zinfin'  ,'zinfindal'  ,'zinfindale'  ,'zinfinde'  ,'zinfindel'  ,'zinfindell'  ,'zinfinel'  ,
-     'zinfinfel'  ,'zinfinger'  ,'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,'zins'  ,
+     'zinfinfel'  ,'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,'zins'  ,
      'zinvandel'  ,'zinvindal'  ,'zinvindel'  ],
-     'cabernet sauvignon' => ['cabernet sauvignon', 'cab. sauvignon','cabarnet', 'cabenet','cabernet', 'sauv', 'cab.', 'cab. sauv', 'cab sav', 'cabsav', 'cab3', 'sauvignon'],
+     'cabernet sauvignon' => ['cabernet sauvignon','cabarnet', 'cabenet', 'sauv', 'cab.', 'cab. sauv', 'cabsav'],
      'chardonnay' =>[
-        'chandon',
         'chard',
-        'chard-on-yeah',
         'charda',
         'chardanay',
         'chardaney',
@@ -41,12 +39,9 @@ describe Varietal do
         'chardnonny',
         'chardnoway',
         'chardo',
-        'chardoe',
-        'chardom',
         'chardomany',
         'chardomay',
         'chardomey',
-        'chardomm',
         'chardommay',
         'chardomnay',
         'chardomney',
@@ -107,9 +102,10 @@ describe Varietal do
    }
     SYNONYMS.each_pair do |k,v|
       v.each do |synonym|
-        it "#{synonym} maps to #{k}" do
-          puts "Varietal.similar_to(#{synonym}).pluck(:name)=#{Varietal.similar_to(synonym).pluck(:name)}"
-          Varietal.similar_to(synonym).pluck(:name).map(&:transliterate).map(&:downcase).should be_include(k.transliterate.downcase)
+        it "maps #{synonym},#{k}" do
+          puts "Varietal.similar_to(#{synonym}).map(&:name)=#{Varietal.similar_to(synonym).map(&:name)}"
+          # debugger if synonym == 'chard'
+          Varietal.similar_to(synonym).map(&:name).map(&:transliterate).map(&:downcase)[0..0].should =~[k.transliterate.downcase]
         end
       end
     end

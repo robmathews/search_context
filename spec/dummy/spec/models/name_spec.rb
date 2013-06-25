@@ -35,7 +35,7 @@ describe Name do
       %W{bird brain brains brawn again brian bran buffalo batch}.each {|t|FactoryGirl.create(:name,:name=>t)}
     end
     it 'should find terms' do
-      Name.similar_to('brain').pluck(:name).should == %W{brain brains bran brawn }
+      Name.similar_to('brain').map(&:name).should =~ %W{brain brains bran brawn }
     end
   end
 end
