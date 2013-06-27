@@ -1,9 +1,11 @@
+require File.expand_path('../../migration_helper', __FILE__)
+include MigrationHelper
+
 class <%= migration_class_name %> < ActiveRecord::Migration
   def up
      # install unaccent if it isn't installed'
-     if select_value(%Q{select extname from pg_extension where extname = 'unaccent'}).nil?
-       execute "CREATE EXTENSION unaccent"
-     end
+     install_extension('unaccent')
+
      # create a new search configuration by copying an existing one. For my purposes, I wanted to use the french dictionary and
      # remove all the accent characters. You could equally use the english dictionary as your base, or create your own.
      # this is only intended to show you the basic command.
