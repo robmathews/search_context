@@ -8,10 +8,22 @@ module SearchContext
       }
       scope :similar_to_by_tsearch, lambda {|term|
         rewrite = "ts_rewrite(plainto_tsquery('#{search_config}','#{term}'),'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''#{term}'') @>original_tsquery') "
-       where("#{rewrite} @@ to_tsvector('#{search_config}',name)").order("ts_rank(to_tsvector('#{search_config}',name),#{rewrite}) desc")
+        where("#{rewrite} @@ to_tsvector('#{search_config}',name)").order("ts_rank(to_tsvector('#{search_config}',name),#{rewrite}) desc")
       }
       scope :similar_to, lambda {|term|
-        similar_to_by_trigram(term).concat(similar_to_by_tsearch(term))
+        similar_to_by_trigram(term).concat(similar_to_by_tsearch(term)).uniq
+      }
+      # spot the search phrase in the noise
+      scope :word_spot_by_trigram, lambda {|term|
+        # normalized score is more than 70%
+        where("similarity(?,name) * length(?)/length(name) > 0.70",term,term)
+      }
+      scope :word_spot_by_tsearch, lambda {|term|
+        query = "plainto_tsquery('#{search_config}',name)"
+        where("to_tsvector('#{search_config}','#{term}') @@ #{query}").order("ts_rank(to_tsvector('#{search_config}',name),#{query}) desc")
+      }
+      scope :word_spot, lambda {|term|
+        word_spot_by_trigram(term).concat(word_spot_by_tsearch(term)).uniq
       }
     end
 

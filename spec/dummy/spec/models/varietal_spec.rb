@@ -110,4 +110,23 @@ describe Varietal do
       end
     end
   end
+  describe 'word spotting' do
+    describe 'basic' do
+      let(:varietal) {Varietal.find_by_name('Chardonnay')}
+      %W{chardonnay chardonay chardonnnay}.each do |variant|
+        it "trigram #{variant}" do
+          Varietal.word_spot_by_trigram("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
+        end
+        it "trigram+tsearch #{variant}" do
+          Varietal.word_spot("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
+        end
+      end
+
+      %W{chardonnay}.each do |variant|
+        it "tsearch #{variant}"do
+          Varietal.word_spot_by_tsearch("red truck #{variant}").map(&:name).should =~ [varietal.name]
+        end
+      end
+    end
+  end
 end
