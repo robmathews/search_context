@@ -1,11 +1,12 @@
+require File.expand_path('../../migration_helper', __FILE__)
+include MigrationHelper
+
 class InstallTrigramExtension < ActiveRecord::Migration
   def up
-     if select_value(%Q{select extname from pg_extension where extname = 'pg_trgm'}).nil?
-       execute "CREATE EXTENSION PG_TRGM"
-     end
+    install_extension('pg_trgm', 'similarity')
   end
 
   def down
-    execute "DROP EXTENSION PG_TRGM"
+    uninstall_extension('pg_trgm')
   end
 end
