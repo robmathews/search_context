@@ -13,7 +13,7 @@ class Name <ActiveRecord::Base
     included do
       # this example demostrates synonyms and stop words implemented via the aliases table, which you have to figure out
       # how to populate on your own
-      scope :similar_to, lambda {|term1|
+      scope :fuzzy_match, lambda {|term1|
        similar_terms= term1.split(/ +/).inject([]) do |acc, name| [name].concat(Name.similar_terms(name).uniq) end.flatten.join(' | ')
        where("ts_rewrite(to_tsquery(?,?),'select original_tsquery,substitution_tsquery from name_aliases WHERE to_tsquery('?','?') @>original_tsquery') @@ names_vector",
            Name.search_config,similar_terms,

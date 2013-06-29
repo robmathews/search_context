@@ -10,7 +10,8 @@ describe Varietal do
      'zinfin'  ,'zinfindal'  ,'zinfindale'  ,'zinfinde'  ,'zinfindel'  ,'zinfindell'  ,'zinfinel'  ,
      'zinfinfel'  ,'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,'zins'  ,
      'zinvandel'  ,'zinvindal'  ,'zinvindel'  ],
-     'cabernet sauvignon' => ['cabernet sauvignon','cabarnet', 'cabenet', 'sauv', 'cab.', 'cab. sauv', 'cabsav'],
+     'cabernet sauvignon' => ['cabernet sauvignon','cabarnet', 'cabernet', 'cabenet', 'sauv', 'cab.', 'cab. sauv', 'cabsav'],
+     'cabernet franc' => ['cabernet franc'],
      'chardonnay' =>[
         'chard',
         'charda',
@@ -103,9 +104,8 @@ describe Varietal do
     SYNONYMS.each_pair do |k,v|
       v.each do |synonym|
         it "maps #{synonym},#{k}" do
-          puts "Varietal.similar_to(#{synonym}).map(&:name)=#{Varietal.similar_to(synonym).map(&:name)}"
-          # debugger if synonym == 'chard'
-          Varietal.similar_to(synonym).map(&:name).map(&:transliterate).map(&:downcase)[0..0].should =~[k.transliterate.downcase]
+          # puts "Varietal.fuzzy_match(#{synonym}).map(&:name)=#{Varietal.fuzzy_match(synonym).map(&:name)}"
+          Varietal.fuzzy_match(synonym).map(&:name).map(&:transliterate).map(&:downcase).should be_include(k.transliterate.downcase)
         end
       end
     end
@@ -115,16 +115,24 @@ describe Varietal do
       let(:varietal) {Varietal.find_by_name('Chardonnay')}
       %W{chardonnay chardonay chardonnnay}.each do |variant|
         it "trigram #{variant}" do
-          Varietal.word_spot_by_trigram("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
+          Varietal.spots_by_trigram("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
         end
         it "trigram+tsearch #{variant}" do
-          Varietal.word_spot("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
+          Varietal.spots("#{variant} red truck with other stuff you know").map(&:name).should =~ [varietal.name]
         end
       end
+      describe 'multiple words' do
+      it 'Cabernet Shiraz' do
+        Varietal.spots("2004 Penfolds Bin 60A Cabernet Shiraz").map(&:name).should =~ ['Cabernet Sauvignon', 'Shiraz']
+      end
+      it 'Merlot-Cabernet' do
+        Varietal.spots("2004 Penfolds Bin 60A Merlot-Cabernet").map(&:name).should =~ ['Cabernet Sauvignon', 'Merlot']
+      end
+    end
 
       %W{chardonnay}.each do |variant|
-        it "tsearch #{variant}"do
-          Varietal.word_spot_by_tsearch("red truck #{variant}").map(&:name).should =~ [varietal.name]
+        it "tsearch 'red truck #{variant}'"do
+          Varietal.spots_by_tsearch("red truck #{variant}").map(&:name).should =~ [varietal.name]
         end
       end
     end

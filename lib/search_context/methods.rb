@@ -2,28 +2,29 @@ require 'active_support/concern'
 module SearchContext
   module Methods extend ActiveSupport::Concern
     included do 
-      scope :similar_to_by_trigram, lambda {|name|
+      scope :fuzzy_match_by_trigram, lambda {|name|
         where("similarity(#{table_name}.name::text,?::text) > ? and abs(length(#{table_name}.name) - length(?)) <2",name,similarity_limit,name).
         order("similarity(#{table_name}.name::text,#{sanitize(name)}::text) desc")
       }
-      scope :similar_to_by_tsearch, lambda {|term|
-        rewrite = "ts_rewrite(plainto_tsquery('#{search_config}','#{term}'),'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''#{term}'') @>original_tsquery') "
+      scope :fuzzy_match_by_tsearch, lambda {|term|
+        rewrite = "ts_rewrite(plainto_tsquery('#{search_config}','#{term}')
+        ,'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''#{term}'') @>original_tsquery') "
         where("#{rewrite} @@ to_tsvector('#{search_config}',name)").order("ts_rank(to_tsvector('#{search_config}',name),#{rewrite}) desc")
       }
-      scope :similar_to, lambda {|term|
-        similar_to_by_trigram(term).concat(similar_to_by_tsearch(term)).uniq
+      scope :fuzzy_match, lambda {|term|
+        fuzzy_match_by_trigram(term).concat(fuzzy_match_by_tsearch(term)).uniq
       }
       # spot the search phrase in the noise
-      scope :word_spot_by_trigram, lambda {|term|
+      scope :spots_by_trigram, lambda {|term|
         # normalized score is more than 70%
         where("similarity(?,name) * length(?)/length(name) > 0.70",term,term)
       }
-      scope :word_spot_by_tsearch, lambda {|term|
-        query = "plainto_tsquery('#{search_config}',name)"
-        where("to_tsvector('#{search_config}','#{term}') @@ #{query}").order("ts_rank(to_tsvector('#{search_config}',name),#{query}) desc")
+      scope :spots_by_tsearch, lambda {|term|
+        query = "ts_rewrite(plainto_tsquery('#{search_config}','name'),'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''name'') @>original_tsquery')"
+        where("to_tsvector('#{search_config}',?) @@ #{query}", term).order("ts_rank(to_tsvector('#{search_config}',name),#{query}) desc")
       }
-      scope :word_spot, lambda {|term|
-        word_spot_by_trigram(term).concat(word_spot_by_tsearch(term)).uniq
+      scope :spots, lambda {|term|
+        spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
       }
     end
 
@@ -50,7 +51,7 @@ module SearchContext
         0.27
       end
       def similar_terms(name)
-        similar_to(name).map(&:name)
+        fuzzy_match(name).map(&:name)
       end
     end
   end

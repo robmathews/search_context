@@ -34,14 +34,14 @@ describe Author do
     before do
       record.save!
     end
-    it 'understand similar_to' do
-      Author.similar_to('joe').should_not be_empty
+    it 'understand fuzzy_match' do
+      Author.fuzzy_match('joe').should_not be_empty
     end
-    it 'understand similar_to for slight differences' do
-      Author.similar_to('joee').should_not be_empty
+    it 'understand fuzzy_match for slight differences' do
+      Author.fuzzy_match('joee').should_not be_empty
     end
     it 'scopes compose'do
-      Author.where('created_at > ?',1.day.ago).similar_to('joe').should_not be_empty
+      Author.where('created_at > ?',1.day.ago).fuzzy_match('joe').should_not be_empty
     end
   end
   describe 'aliases' do
@@ -53,10 +53,10 @@ describe Author do
       end
     end
     it 'synonyms' do
-      Author.similar_to('joseph').should_not be_empty
+      Author.fuzzy_match('joseph').should_not be_empty
     end
     it 'stop words' do
-      Author.similar_to('mr Mr joe Saint John').should_not be_empty
+      Author.fuzzy_match('mr Mr joe Saint John').should_not be_empty
     end
   end
 end

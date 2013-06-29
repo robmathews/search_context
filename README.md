@@ -90,7 +90,7 @@ This will generate 3 migrations, which you should review before using:
 ## Integration with tsearch
 
 This scope can be integrated with the tsearch query like this: 
-    Author.where("to_tsquery(?,?) @@ context_search_terms",SearchTerm.search_config, SearchTerm.similar_to_as_tsvector('Charlie'))
+    Author.where("to_tsquery(?,?) @@ context_search_terms",SearchTerm.search_config, SearchTerm.fuzzy_match_as_tsvector('Charlie'))
     
 This is only an example of what you can do, really you'll be wanting to author something tsearch specific pretty quickly using features like weighting. Therefore this gems approach is only to sketch an outline and provide useful functions and tools for you to extend.
 
