@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130625191624) do
+ActiveRecord::Schema.define(:version => 20130629161005) do
 
   create_table "authors", :force => true do |t|
     t.string   "first_name"
@@ -22,6 +22,13 @@ ActiveRecord::Schema.define(:version => 20130625191624) do
   end
 
   add_index "authors", ["names_vector"], :name => "idx_names_vector_on_authors"
+
+  create_table "bottles", :force => true do |t|
+    t.string   "name"
+    t.string   "varietal"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "foos", :force => true do |t|
     t.string   "field1"
