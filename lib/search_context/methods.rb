@@ -8,7 +8,7 @@ module SearchContext
       }
       scope :fuzzy_match_by_tsearch, lambda {|term|
         rewrite = "ts_rewrite(plainto_tsquery('#{search_config}','#{term}')
-        ,'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''#{term}'') @>original_tsquery') "
+        ,$$select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery('#{search_config}','#{term}') @>original_tsquery$$) "
         where("#{rewrite} @@ to_tsvector('#{search_config}',name)").order("ts_rank(to_tsvector('#{search_config}',name),#{rewrite}) desc")
       }
       scope :fuzzy_match, lambda {|term|
@@ -16,12 +16,13 @@ module SearchContext
       }
       # spot the search phrase in the noise
       scope :spots_by_trigram, lambda {|term|
-        # normalized score is more than 70%
-        where("similarity(?,name) * length(?)/length(name) > 0.70",term,term)
+        # normalized score is more than 70%, which is 1 - 0.30
+        where("similarity(?,name) * length(?)/length(name) > ?",term,term,1 - similarity_limit)
       }
       scope :spots_by_tsearch, lambda {|term|
-        query = "ts_rewrite(plainto_tsquery('#{search_config}','name'),'select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery(''#{search_config}'',''name'') @>original_tsquery')"
-        where("to_tsvector('#{search_config}',?) @@ #{query}", term).order("ts_rank(to_tsvector('#{search_config}',name),#{query}) desc")
+        term_safe = ActiveRecord::Base.sanitize(term.gsub(/\/|-|\?/, ' '))
+        rewrite_query = "to_tsvector('#{search_config}',querytree(ts_rewrite(plainto_tsquery('#{search_config}',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('#{search_config}',#{term_safe}) @>original_tsquery$$)))"
+        where("#{rewrite_query} @@ plainto_tsquery('#{search_config}',name)").order("ts_rank(#{rewrite_query},plainto_tsquery('#{search_config}',name)) desc")
       }
       scope :spots, lambda {|term|
         spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
