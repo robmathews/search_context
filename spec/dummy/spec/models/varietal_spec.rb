@@ -141,11 +141,9 @@ describe Varietal do
       end
       describe 'multiple words' do
       it 'Cabernet Shiraz' do
-        tmp=Varietal.spots("2004 Penfolds Bin 60A Cabernet Shiraz")
         Varietal.spots("2004 Penfolds Bin 60A Cabernet Shiraz").map(&:name).should =~ ['Cabernet Sauvignon', 'Shiraz']
       end
       it 'no substrings' do
-        tmp=Varietal.spots_by_trigram("2004 Penfolds Bin 60A Cabernet Sauvignon")
         Varietal.spots_by_trigram("2004 Penfolds Bin 60A Cabernet Sauvignon").map(&:name).should =~ ['Cabernet Sauvignon']
       end
       it 'Merlot-Cabernet' do
@@ -156,6 +154,18 @@ describe Varietal do
       %W{chardonnay}.each do |variant|
         it "tsearch 'red truck #{variant}'"do
           Varietal.spots_by_tsearch("red truck #{variant}").map(&:name).should =~ [varietal.name]
+        end
+      end
+
+      describe 'remembers original spot' do
+        it 'trigram case' do
+          Varietal.spots_by_trigram("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
+        end
+        it 'tsearch case' do
+          Varietal.spots_by_tsearch("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
+        end
+        it 'either case/random order' do
+          Varietal.spots("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
         end
       end
     end

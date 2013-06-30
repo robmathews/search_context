@@ -12,6 +12,8 @@ module SearchContext
 
   module Methods extend ActiveSupport::Concern
     included do 
+      # attr_accessor :rank, :trigram_rank, :trigram_spot, :tsearch_location, :tsearch_location_rewritten
+      
       scope :fuzzy_match_by_trigram, lambda {|name|
         select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{ActiveRecord::Base.sanitize(name)} as trigram_spot","similarity(#{table_name}.name::text,#{sanitize(name)}::text) as trigram_rank"]).where("similarity(#{table_name}.name::text,?::text) > ? and abs(length(#{table_name}.name) - length(?)) <2",name,similarity_limit,name).
         order("similarity(#{table_name}.name::text,#{sanitize(name)}::text) desc")
@@ -26,39 +28,51 @@ module SearchContext
       }
       # spot the search phrase in the noise, using trigram to look for transposed letters (allows 1=2 errors, depending how close they are), or tsearch (better an phonetic spellings)
       scope :spots_by_trigram, lambda {|term|
-        sep = / |\/|-/
-        result = term.transliterate.split_pairs(sep).map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
+        result = term.transliterate.split_pairs.map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
         # filter out the weaker matches, allow ties for first place
-        max = result.map(&:trigram_rank).max
-        result.select {|v| v.trigram_rank >= max}
+        max = result.map(&:trigram_rank_f).max 
+        result.select {|v| v.trigram_rank_f >= max}
       }
       scope :spots_by_tsearch, lambda {|term|
-        term_safe = ActiveRecord::Base.sanitize(term.gsub(/\/|-|\?/, ' '))
+        term_safe = ActiveRecord::Base.sanitize(term.gsub(/\\|\/|-|\?/, ' '))
         rewrite_query = "querytree(ts_rewrite(plainto_tsquery('#{search_config}',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('#{search_config}',#{term_safe}) @>original_tsquery$$))"
         rewrite_tsvector = "to_tsvector('#{search_config}',#{rewrite_query})"
         tsquery = "plainto_tsquery('#{search_config}',name)"
         headline = "ts_headline('#{search_config}',#{term_safe},#{tsquery})"
         headline_rewritten = "ts_headline('#{search_config}',#{rewrite_query},#{tsquery})"
         rank = "ts_rank(#{rewrite_tsvector},#{tsquery},32)"
-        select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{rank} as rank","#{headline} as location","#{headline_rewritten} as location"]).where("#{rewrite_tsvector} @@ #{tsquery}").order(rank)
+        result=select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{rank} as rank","#{headline} as tsearch_location","#{headline_rewritten} as tsearch_location_rewritten"]).where("#{rewrite_tsvector} @@ #{tsquery}").order(rank)
+        # filter out the weaker matches, allow ties for first place
+        max = result.map(&:rank_f).max 
+        result.select {|v| v.rank_f >= max}
       }
       scope :spots, lambda {|term|
         spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
       }
     end
     
+    def rank_f
+      rank.to_f
+    end
+
+    def trigram_rank_f
+      trigram_rank.to_f
+    end
     # for the last spots by tsearch command. returns the original word it matched against
     def spot
-      trigram_spot || tsearch_spot
+      if respond_to?(:trigram_spot)
+       trigram_spot
+      else
+       tsearch_spot
+      end
     end
     
     def tsearch_spot
-      return $1 if headline.scan(/<b>(\w.*)<\/b>/)
-      headline_rewritten.scan(/<b>(\w.*)<\/b>/)
+      return $1 if tsearch_location.scan(/<b>(\w.*)<\/b>/)
+      tsearch_location_rewritten.scan(/<b>(\w.*)<\/b>/)
     end
 
     module ClassMethods
-      attr_accessor :rank, :trigram_rank, :location, :original_name
       
       def alias_class
         Module.const_get("#{name}Alias".to_sym)
