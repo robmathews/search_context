@@ -1,9 +1,19 @@
 require 'active_support/concern'
 module SearchContext
+  module StringHelpers
+    def transliterate
+      ActiveSupport::Inflector.transliterate(self)
+    end
+    def split_pairs(sep=/ |\/|-/)
+      words = split(sep)
+      words.concat((0..words.size-2).map {|index| words.slice(index,2).join(' ') })
+    end
+  end
+
   module Methods extend ActiveSupport::Concern
     included do 
       scope :fuzzy_match_by_trigram, lambda {|name|
-        where("similarity(#{table_name}.name::text,?::text) > ? and abs(length(#{table_name}.name) - length(?)) <2",name,similarity_limit,name).
+        select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{ActiveRecord::Base.sanitize(name)} as trigram_spot","similarity(#{table_name}.name::text,#{sanitize(name)}::text) as trigram_rank"]).where("similarity(#{table_name}.name::text,?::text) > ? and abs(length(#{table_name}.name) - length(?)) <2",name,similarity_limit,name).
         order("similarity(#{table_name}.name::text,#{sanitize(name)}::text) desc")
       }
       scope :fuzzy_match_by_tsearch, lambda {|term|
@@ -14,22 +24,42 @@ module SearchContext
       scope :fuzzy_match, lambda {|term|
         fuzzy_match_by_trigram(term).concat(fuzzy_match_by_tsearch(term)).uniq
       }
-      # spot the search phrase in the noise
+      # spot the search phrase in the noise, using trigram to look for transposed letters (allows 1=2 errors, depending how close they are), or tsearch (better an phonetic spellings)
       scope :spots_by_trigram, lambda {|term|
-        # normalized score is more than 70%, which is 1 - 0.30
-        where("similarity(?,name) * length(?)/length(name) > ?",term,term,1 - similarity_limit)
+        sep = / |\/|-/
+        result = term.transliterate.split_pairs(sep).map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
+        # filter out the weaker matches, allow ties for first place
+        max = result.map(&:trigram_rank).max
+        result.select {|v| v.trigram_rank >= max}
       }
       scope :spots_by_tsearch, lambda {|term|
         term_safe = ActiveRecord::Base.sanitize(term.gsub(/\/|-|\?/, ' '))
-        rewrite_query = "to_tsvector('#{search_config}',querytree(ts_rewrite(plainto_tsquery('#{search_config}',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('#{search_config}',#{term_safe}) @>original_tsquery$$)))"
-        where("#{rewrite_query} @@ plainto_tsquery('#{search_config}',name)").order("ts_rank(#{rewrite_query},plainto_tsquery('#{search_config}',name)) desc")
+        rewrite_query = "querytree(ts_rewrite(plainto_tsquery('#{search_config}',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('#{search_config}',#{term_safe}) @>original_tsquery$$))"
+        rewrite_tsvector = "to_tsvector('#{search_config}',#{rewrite_query})"
+        tsquery = "plainto_tsquery('#{search_config}',name)"
+        headline = "ts_headline('#{search_config}',#{term_safe},#{tsquery})"
+        headline_rewritten = "ts_headline('#{search_config}',#{rewrite_query},#{tsquery})"
+        rank = "ts_rank(#{rewrite_tsvector},#{tsquery},32)"
+        select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{rank} as rank","#{headline} as location","#{headline_rewritten} as location"]).where("#{rewrite_tsvector} @@ #{tsquery}").order(rank)
       }
       scope :spots, lambda {|term|
         spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
       }
     end
+    
+    # for the last spots by tsearch command. returns the original word it matched against
+    def spot
+      trigram_spot || tsearch_spot
+    end
+    
+    def tsearch_spot
+      return $1 if headline.scan(/<b>(\w.*)<\/b>/)
+      headline_rewritten.scan(/<b>(\w.*)<\/b>/)
+    end
 
     module ClassMethods
+      attr_accessor :rank, :trigram_rank, :location, :original_name
+      
       def alias_class
         Module.const_get("#{name}Alias".to_sym)
       end
@@ -49,7 +79,7 @@ module SearchContext
       end
       # default definition of similarity, you can override this in the class if needed
       def similarity_limit
-        0.27
+        0.293 # don't ask
       end
       def similar_terms(name)
         fuzzy_match(name).map(&:name)
@@ -57,3 +87,4 @@ module SearchContext
     end
   end
 end
+String.send :include, SearchContext::StringHelpers

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'transliterate'
 describe Varietal do
   
   describe 'fuzzy matching' do
@@ -110,6 +109,25 @@ describe Varietal do
       end
     end
   end
+  # this is just the list of the what similarity algorithm finds similar with a threshold >.29. Allowing words with 2 nearby errors requires a threshold more like 0.23
+  SYNONYMS_NO_REWRITES = {
+   'zinfandel' => [ 'zinfande','zinfandale'  ,'zinfandel'  ,'zinfandell'  ,'zinfandels'  ,'zinfandil'  ,'zinfandl' ,
+   'zinfandwl'  ,'zinfanfel'  ,'zinfanndel'  ,'zinfansekl'  ,
+   'zinfemdel'   ,'zinfendel'  ,'zinfendell'  ,'zinfidel' ,
+   'zinfinde'  ,'zinfindel'  ,'zinfindell'  ,'zinfinel'  ,
+   'zinfinfel'  ,'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,
+   'zinvandel'  ,'zinvindel'  ],
+   'cabernet sauvignon' => ['cabernet sauvignon'],
+   'cabernet franc' => ['cabernet franc']
+  }
+  SYNONYMS_NO_REWRITES.each_pair do |k,v|
+    v.each do |synonym|
+      it "remembers spot #{k},#{synonym}" do
+        Varietal.fuzzy_match_by_trigram(synonym).should_not be_empty
+        Varietal.fuzzy_match_by_trigram(synonym).map(&:trigram_spot).map(&:transliterate).map(&:downcase).should be_include(synonym.transliterate.downcase)
+      end
+    end
+  end
   describe 'word spotting' do
     describe 'basic' do
       let(:varietal) {Varietal.find_by_name('Chardonnay')}
@@ -123,7 +141,12 @@ describe Varietal do
       end
       describe 'multiple words' do
       it 'Cabernet Shiraz' do
+        tmp=Varietal.spots("2004 Penfolds Bin 60A Cabernet Shiraz")
         Varietal.spots("2004 Penfolds Bin 60A Cabernet Shiraz").map(&:name).should =~ ['Cabernet Sauvignon', 'Shiraz']
+      end
+      it 'no substrings' do
+        tmp=Varietal.spots_by_trigram("2004 Penfolds Bin 60A Cabernet Sauvignon")
+        Varietal.spots_by_trigram("2004 Penfolds Bin 60A Cabernet Sauvignon").map(&:name).should =~ ['Cabernet Sauvignon']
       end
       it 'Merlot-Cabernet' do
         Varietal.spots("2004 Penfolds Bin 60A Merlot-Cabernet").map(&:name).should =~ ['Cabernet Sauvignon', 'Merlot']
