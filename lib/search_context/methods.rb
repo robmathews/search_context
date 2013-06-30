@@ -35,7 +35,7 @@ module SearchContext
       }
       scope :spots_by_tsearch, lambda {|term|
         term_safe = ActiveRecord::Base.sanitize(term.gsub(/\\|\/|-|\?/, ' '))
-        rewrite_query = "querytree(ts_rewrite(plainto_tsquery('#{search_config}',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('#{search_config}',#{term_safe}) @>original_tsquery$$))"
+        rewrite_query = "querytree(ts_rewrite(plainto_tsquery('simple',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('simple',#{term_safe}) @>original_tsquery$$))"
         rewrite_tsvector = "to_tsvector('#{search_config}',#{rewrite_query})"
         tsquery = "plainto_tsquery('#{search_config}',name)"
         headline = "ts_headline('#{search_config}',#{term_safe},#{tsquery})"
@@ -44,10 +44,18 @@ module SearchContext
         result=select(column_names.map{|name|"#{table_name}.#{name}"}.concat ["#{rank} as rank","#{headline} as tsearch_location","#{headline_rewritten} as tsearch_location_rewritten"]).where("#{rewrite_tsvector} @@ #{tsquery}").order(rank)
         # filter out the weaker matches, allow ties for first place
         max = result.map(&:rank_f).max 
-        result.select {|v| v.rank_f >= max}
+        result.select {|v| v.rank_f >= max * 0.50}
       }
       scope :spots, lambda {|term|
         spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
+        # results_with_count = spots_by_trigram(term).concat(spots_by_tsearch(term)).each_with_object(Hash.new(0)) { |o, h| h[o] += 1 }
+        # # ok, prefer answers in both algorithms over answers with one vote
+        # high_confidence = results_with_count.select {|k,v| v==2}
+        # if high_confidence.empty?
+        #   results_with_count.keys
+        # else
+        #   high_confidence.keys
+        # end
       }
     end
     
@@ -93,7 +101,7 @@ module SearchContext
       end
       # default definition of similarity, you can override this in the class if needed
       def similarity_limit
-        0.293 # don't ask
+        0.420 # don't ask
       end
       def similar_terms(name)
         fuzzy_match(name).map(&:name)
