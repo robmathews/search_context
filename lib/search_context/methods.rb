@@ -27,14 +27,15 @@ module SearchContext
       scope :fuzzy_match, lambda {|term|
         fuzzy_match_by_trigram(term).concat(fuzzy_match_by_tsearch(term)).uniq
       }
+      
       # spot the search phrase in the noise, using trigram to look for transposed letters (allows 1=2 errors, depending how close they are), or tsearch (better an phonetic spellings)
-      scope :spots_by_trigram, lambda {|term|
+      def self.spots_by_trigram(term)
         result = term.transliterate.split_pairs.map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
         # filter out the weaker matches, allow ties for first place
         max = result.map(&:trigram_rank_f).max 
         result.select {|v| v.trigram_rank_f >= max}
-      }
-      scope :spots_by_tsearch, lambda {|term|
+      end
+      def self.spots_by_tsearch(term)
         term_safe = ActiveRecord::Base.sanitize(term.gsub(/\\|\/|-|\?/, ' '))
         rewrite_query = "querytree(ts_rewrite(plainto_tsquery('simple',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('simple',#{term_safe}) @>original_tsquery$$))"
         rewrite_tsvector = "to_tsvector('#{search_config}',#{rewrite_query})"
@@ -46,18 +47,10 @@ module SearchContext
         # filter out the weaker matches, allow ties for first place
         max = result.map(&:rank_f).max 
         result.select {|v| v.rank_f >= max * 0.50}
-      }
-      scope :spots, lambda {|term|
+      end
+      def self.spots(term)
         spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
-        # results_with_count = spots_by_trigram(term).concat(spots_by_tsearch(term)).each_with_object(Hash.new(0)) { |o, h| h[o] += 1 }
-        # # ok, prefer answers in both algorithms over answers with one vote
-        # high_confidence = results_with_count.select {|k,v| v==2}
-        # if high_confidence.empty?
-        #   results_with_count.keys
-        # else
-        #   high_confidence.keys
-        # end
-      }
+      end
     end
     
     def rank_f
