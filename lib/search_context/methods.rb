@@ -71,7 +71,7 @@ module SearchContext
     
     def tsearch_spot
       return $1 if tsearch_location.scan(/<b>(\w.*)<\/b>/)
-      tsearch_location_rewritten.scan(/<b>(\w.*)<\/b>/)
+      return $1 if tsearch_location_rewritten.scan(/<b>(\w.*)<\/b>/)
     end
 
     module ClassMethods

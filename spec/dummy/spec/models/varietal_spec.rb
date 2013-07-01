@@ -157,13 +157,16 @@ describe Varietal do
 
       describe 'remembers original spot' do
         it 'trigram case' do
-          Varietal.spots_by_trigram("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
+          Varietal.spots_by_trigram("2004 Penfolds Bin 60A Merlot").first.spot.should == 'Merlot'
         end
         it 'tsearch case' do
-          Varietal.spots_by_tsearch("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
+          Varietal.spots_by_tsearch("2004 Penfolds Bin 60A Merlot").first.spot.should == 'Merlot'
         end
         it 'either case/random order' do
-          Varietal.spots("2004 Penfolds Bin 60A Merlot").first.spot == 'merlot'
+          Varietal.spots("2004 Penfolds Bin 60A Merlot").first.spot.should == 'Merlot'
+        end
+        it 'rewritten query - tsearch' do
+          Varietal.spots_by_tsearch("1999 Hyatt Cabernet").first.spot.should == 'Cabernet'
         end
       end
     end
