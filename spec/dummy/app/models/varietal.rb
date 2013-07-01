@@ -7,6 +7,9 @@ class Varietal <ActiveRecord::Base
   def self.search_config
     "varietals_search_config"
   end
+  def self.alias_search_config
+    "varietals_alias_search_config"
+  end
   # central place for queries using this search context, if it makes sense to share the search queries amoung multiple duck-typed models.
   # for example, BottleSource, Bottle, Wine all use similar vocabulary and search configuration. and queries
   module Query extend ActiveSupport::Concern

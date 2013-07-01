@@ -227,20 +227,43 @@ Uva Pelegrina,sauvignon blanc
 Weisser Sauvignon,sauvignon blanc
 Zld Ortlibi,sauvignon blanc
 chard,chardonnay
-chardp,chardonnay
-chardnay,chardonnay
-chardine,chardonnay
-chardo,chardonnay
-chardmey,chardonnay
+chardany,chardonnay
 chardeny,chardonnay
+chardery,chardonnay
+chardine,chardonnay
+chardmey,chardonnay
+chardnay,chardonnay
+chardney,chardonnay
+chardo,chardonnay
 chardon,chardonnay
+chardonannay,chardonnay
 chardone,chardonnay
 chardonniere,chardonnay
-chardney,chardonnay
-chardonannay,chardonnay
-chardery,chardonnay
 chardony,chardonnay
-chardany,chardonnay
+chardp,chardonnay
+charduney,chardonnay
+chardomney,chardonnay
+chardaney,chardonnay
+charddonany,chardonnay
+chardpnnau,chardonnay
+chardaney,chardonnay
+chardonniere,chardonnay
+chardeney,chardonnay
+chardomany,chardonnay
+chardpnays,chardonnay
+chardpmay,chardonnay
+chardpnmey,chardonnay
+chards,chardonnay
+chardnonny,chardonnay
+chardona,chardonnay
+charda,chardonnay
+chardpmau,chardonnay
+chardnoway,chardonnay
+chardonn,chardonnay
+chardouny,chardonnay
+chardomey,chardonnay
+chardannoy,chardonnay
+chardanney,chardonnay
 cab,cabernet sauvignon
 sauv,cabernet sauvignon
 cabsav,cabernet sauvignon
@@ -250,14 +273,23 @@ cabernet,cabernet sauvignon
 cabarnet,cabernet sauvignon
 cabenet,cabernet sauvignon
 zin,zinfandel
+zins,zinfandel
 zinfand,zinfandel
-zinfin,zinfandel
-zinfidal,zinfandel
-zinfindale,zinfandel
-zinfindal,zinfandel
+zinfansekl,zinfandel
 zinfedal,zinfandel
-zinvindal,zinfandel
 zinfendale,zinfandel
+zinfendell,zinfandel
+zinfendell,zinfandel
+zinfidal,zinfandel
+zinfin,zinfandel
+zinfindell,zinfandel
+zinfindal,zinfandel
+zinfindale,zinfandel
+zinfinde,zinfandel
+zinfindell,zinfandel
+zinfinel,zinfandel
+zinfinfel,zinfandel
+zinvindal,zinfandel
 Alvarin Blanco,Albariño
 Alvarinho,Albariño
 Azal Blanco,Albariño
@@ -399,17 +431,3 @@ Valdepeñas,Airén
 Gamay Noir,Gamay
 Scuppernong,Muscadine
 Muscadines,Muscadine
-Black Beauty,Muscadine
-Carlos,Muscadine
-Cowart,Muscadine
-Flowers,Muscadine
-Fry,Muscadine
-Granny Val,Muscadine
-Ison,Muscadine
-James,Muscadine
-Jumbo,Muscadine
-Magnolia,Muscadine
-Memory,Muscadine
-Summit,Muscadine
-Supreme,Muscadine
-Thomas,Muscadine

@@ -45,6 +45,10 @@ class SearchContextGenerator < Rails::Generators::Base
     "#{table_name}_search_config"
   end
 
+  def alias_search_config_name
+    "#{table_name}_alias_search_config"
+  end
+  
   def aliases_file_name
     "#{table_name.singularize}_alias"
   end

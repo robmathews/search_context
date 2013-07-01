@@ -3,8 +3,8 @@ class <%= migration_class_name %> < ActiveRecord::Migration
     execute <<-EOS
     CREATE OR REPLACE FUNCTION <%=trigger_sp_name %>() RETURNS trigger AS $$
     begin
-      new.original_tsquery = plainto_tsquery('simple', coalesce(new.original,''));
-      new.substitution_tsquery = plainto_tsquery('simple', coalesce(new.substitution,''));
+      new.original_tsquery = plainto_tsquery('<%=alias_search_config_name%>', coalesce(new.original,''));
+      new.substitution_tsquery = plainto_tsquery('<%=alias_search_config_name%>', coalesce(new.substitution,''));
       return new;
     end
     $$ LANGUAGE plpgsql;

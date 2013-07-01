@@ -24,9 +24,18 @@ class <%= migration_class_name %> < ActiveRecord::Migration
      execute %Q{ALTER TEXT SEARCH CONFIGURATION <%=search_config_name%>
              ALTER MAPPING FOR hword, hword_part, word
              WITH unaccent, french_stem;}
+    
+    # create a variant of the simple dictionary that ignores accents
+    execute %Q{CREATE TEXT SEARCH CONFIGURATION <%=alias_search_config_name%> ( COPY = pg_catalog.simple );}
+    execute %{ALTER TEXT SEARCH CONFIGURATION <%=alias_search_config_name%>
+           DROP MAPPING FOR email, file, float, host, int, sfloat, uint, url, url_path, version}
+    execute %Q{ALTER TEXT SEARCH CONFIGURATION <%=alias_search_config_name%>
+            ALTER MAPPING FOR hword, hword_part, word
+            WITH unaccent, simple;}
   end
 
   def down
     execute "DROP TEXT SEARCH CONFIGURATION <%=search_config_name%>"
+    execute "DROP TEXT SEARCH CONFIGURATION <%=alias_search_config_name%>"
   end
 end

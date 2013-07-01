@@ -3,8 +3,8 @@ class AddVarietalAliasesTrigger < ActiveRecord::Migration
     execute <<-EOS
     CREATE OR REPLACE FUNCTION sp_update_varietal_aliases() RETURNS trigger AS $$
     begin
-      new.original_tsquery = plainto_tsquery('varietals_search_config', coalesce(new.original,''));
-      new.substitution_tsquery = plainto_tsquery('varietals_search_config', coalesce(new.substitution,''));
+      new.original_tsquery = plainto_tsquery('varietals_alias_search_config', coalesce(new.original,''));
+      new.substitution_tsquery = plainto_tsquery('varietals_alias_search_config', coalesce(new.substitution,''));
       return new;
     end
     $$ LANGUAGE plpgsql;

@@ -28,9 +28,7 @@ describe Varietal do
         'chardennay',
         'chardeny',
         'chardery',
-        'chardina',
         'chardinay',
-        'chardine',
         'chardinnay',
         'chardmey',
         'chardnay',
@@ -102,7 +100,7 @@ describe Varietal do
    }
     SYNONYMS.each_pair do |k,v|
       v.each do |synonym|
-        it "maps #{synonym},#{k}" do
+        it "fuzzy_match #{synonym},#{k}" do
           # puts "Varietal.fuzzy_match(#{synonym}).map(&:name)=#{Varietal.fuzzy_match(synonym).map(&:name)}"
           Varietal.fuzzy_match(synonym).map(&:name).map(&:transliterate).map(&:downcase).should be_include(k.transliterate.downcase)
         end
@@ -112,17 +110,17 @@ describe Varietal do
   # this is just the list of the what similarity algorithm finds similar with a threshold >.29. Allowing words with 2 nearby errors requires a threshold more like 0.23
   SYNONYMS_NO_REWRITES = {
    'zinfandel' => [ 'zinfande','zinfandale'  ,'zinfandel'  ,'zinfandell'  ,'zinfandels'  ,'zinfandil'  ,'zinfandl' ,
-   'zinfandwl'  ,'zinfanfel'  ,'zinfanndel'  ,'zinfansekl'  ,
-   'zinfemdel'   ,'zinfendel'  ,'zinfendell'  ,'zinfidel' ,
-   'zinfinde'  ,'zinfindel'  ,'zinfindell'  ,'zinfinel'  ,
-   'zinfinfel'  ,'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,
+   'zinfandwl'  ,'zinfanfel'  ,'zinfanndel'  ,
+   'zinfemdel'   ,'zinfendel'  ,'zinfidel' ,
+   'zinfindel'  ,
+   'zinfsndel'  ,'zinfundel'  ,'zingandel'  ,'zinnfandel'  ,
    'zinvandel'  ,'zinvindel'  ],
    'cabernet sauvignon' => ['cabernet sauvignon'],
    'cabernet franc' => ['cabernet franc']
   }
   SYNONYMS_NO_REWRITES.each_pair do |k,v|
     v.each do |synonym|
-      it "remembers spot #{k},#{synonym}" do
+      it "fuzzy_match_by_trigram #{k},#{synonym}" do
         Varietal.fuzzy_match_by_trigram(synonym).should_not be_empty
         Varietal.fuzzy_match_by_trigram(synonym).map(&:trigram_spot).map(&:transliterate).map(&:downcase).should be_include(synonym.transliterate.downcase)
       end

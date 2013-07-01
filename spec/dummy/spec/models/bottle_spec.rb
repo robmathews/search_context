@@ -6,7 +6,7 @@ describe "test word spotting on real data" do
     next if bottle.name =~ /2004 JC Cellars Syrah Fess Parker's Vineyard Santa Barbara County/ # shiraz works, but Barbera is a major varietal in Portugal
     next if bottle.name =~ /2003 Ciacci Piccolomini d'Aragona Brunello di Montalcino Vigna di Pianrosso/ # same deal for Aragona, it matches aragones
     next if bottle.name =~ /Fattoria dei Barbi Brunello di Montalcino/ # Barbi mwatches Barbera, which is a red Italian wine grape variety that, as of 2000, was the third most-planted red grape variety in Italy (after Sangiovese and Montepulciano).
-    # next unless bottle.name =~/2005 Iron Horse Cuvee R Sauvignon Blanc\/Viognier/
+    next unless bottle.name =~/2002 Iron Horse T-bar-T Cabernet Franc/
     # "'hous' & 'coach' & 'coach' & 'block' & 'branson' & '<b>sauvignon</b>' & '<b>cabernet</b>' & '<b>sauvignon</b>' & 'blanc'"
     it "#{bottle.name} spots #{bottle.varietal}" do
       if true

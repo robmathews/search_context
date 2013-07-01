@@ -8,6 +8,10 @@ class <%= class_name %> <ActiveRecord::Base
   def self.search_config
     "<%= search_config_name %>"
   end
+
+  def self.alias_search_config
+    "<%= alias_search_config_name %>"
+  end
   # central place for queries using this search context, if it makes sense to share the search queries amoung multiple duck-typed models.
   # for example, BottleSource, Bottle, Wine all use similar vocabulary and search configuration. and queries
   module Query extend ActiveSupport::Concern

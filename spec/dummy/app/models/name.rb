@@ -7,6 +7,14 @@ class Name <ActiveRecord::Base
   def self.search_config
     "names_search_config"
   end
+  def self.alias_search_config
+    "names_alias_search_config"
+  end
+
+  def self.similarity_limit
+    0.27
+  end
+
   # central place for queries using this search context, if it makes sense to share the search queries amoung multiple duck-typed models.
   # for example, BottleSource, Bottle, Wine all use similar vocabulary and search configuration. and queries
   module Query extend ActiveSupport::Concern

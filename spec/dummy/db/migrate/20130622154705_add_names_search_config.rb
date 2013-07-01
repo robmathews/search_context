@@ -14,9 +14,18 @@ class AddNamesSearchConfig < ActiveRecord::Migration
      execute %Q{ALTER TEXT SEARCH CONFIGURATION names_search_config
              ALTER MAPPING FOR hword, hword_part, word
              WITH unaccent, french_stem;}
+
+      execute %Q{CREATE TEXT SEARCH CONFIGURATION names_alias_search_config ( COPY = pg_catalog.simple );}
+      execute %{ALTER TEXT SEARCH CONFIGURATION names_alias_search_config
+             DROP MAPPING FOR email, file, float, host, int, sfloat, uint, url, url_path, version}
+     # remove all the accent characters. 
+      execute %Q{ALTER TEXT SEARCH CONFIGURATION names_alias_search_config
+              ALTER MAPPING FOR hword, hword_part, word
+              WITH unaccent, simple;}
   end
 
   def down
     execute "DROP TEXT SEARCH CONFIGURATION names_search_config"
+    execute "DROP TEXT SEARCH CONFIGURATION names_alias_search_config"
   end
 end

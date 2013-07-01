@@ -19,8 +19,9 @@ module SearchContext
         order("similarity(#{table_name}.name::text,#{sanitize(name)}::text) desc")
       }
       scope :fuzzy_match_by_tsearch, lambda {|term|
-        rewrite = "ts_rewrite(plainto_tsquery('#{search_config}','#{term}')
-        ,$$select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery('#{search_config}','#{term}') @>original_tsquery$$) "
+        term_safe = ActiveRecord::Base.sanitize(term.gsub(/\\|\/|-|\?/, ' '))
+        rewrite = "plainto_tsquery('#{search_config}',querytree(ts_rewrite(plainto_tsquery('#{alias_search_config}',#{term_safe})
+        ,$$select original_tsquery,substitution_tsquery from #{alias_class.table_name} WHERE plainto_tsquery('#{alias_search_config}','#{term}') @>original_tsquery$$)))"
         where("#{rewrite} @@ to_tsvector('#{search_config}',name)").order("ts_rank(to_tsvector('#{search_config}',name),#{rewrite}) desc")
       }
       scope :fuzzy_match, lambda {|term|
