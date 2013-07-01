@@ -4,9 +4,9 @@ module SearchContext
     def transliterate
       ActiveSupport::Inflector.transliterate(self)
     end
-    def split_pairs(sep=/ |\/|-/)
+    def split_pairs(sep=/ |\/|-/, max_length=2)
       words = split(sep)
-      words.concat((0..words.size-2).map {|index| words.slice(index,2).join(' ') })
+      words.concat((2..max_length).map {|iii|(0..words.size-iii).map {|index| words.slice(index,iii).join(' ') }}.flatten)
     end
   end
 
@@ -29,8 +29,8 @@ module SearchContext
       }
       
       # spot the search phrase in the noise, using trigram to look for transposed letters (allows 1=2 errors, depending how close they are), or tsearch (better an phonetic spellings)
-      def self.spots_by_trigram(term)
-        result = term.transliterate.split_pairs.map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
+      def self.spots_by_trigram(term, max_terms=2)
+        result = term.transliterate.split_pairs(/ |\/|-/,max_terms).map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
         # filter out the weaker matches, allow ties for first place
         max = result.map(&:trigram_rank_f).max 
         result.select {|v| v.trigram_rank_f >= max}

@@ -12,6 +12,9 @@ describe SearchContext::StringHelpers do
     it "hypens" do
       "bar-food sucks".split_pairs.should =~ ["bar", "food", "sucks", "bar food", "food sucks"]
     end
+    it "3 word pairs" do
+      "bar food sucks".split_pairs(/ |\/|-/,3).should =~ ["bar", "food", "sucks", "bar food", "food sucks", "bar food sucks"]
+    end
   end
   it 'transliterate' do
     "Bogdanuša".transliterate.should == 'Bogdanusa'
