@@ -4,9 +4,9 @@ module SearchContext
     def transliterate
       ActiveSupport::Inflector.transliterate(self)
     end
-    def split_pairs(sep=/ |\/|-/, max_length=2)
+    def split_pairs(sep=/ |\/|-/)
       words = split(sep)
-      words.concat((2..max_length).map {|iii|(0..words.size-iii).map {|index| words.slice(index,iii).join(' ') }}.flatten)
+      words.concat((2..words.size).map {|iii|(0..words.size-iii).map {|index| words.slice(index,iii).join(' ') }}.flatten)
     end
   end
 
@@ -29,12 +29,17 @@ module SearchContext
       }
       
       # spot the search phrase in the noise, using trigram to look for transposed letters (allows 1=2 errors, depending how close they are), or tsearch (better an phonetic spellings)
-      def self.spots_by_trigram(term, max_terms=2)
-        result = term.transliterate.split_pairs(/ |\/|-/,max_terms).map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
+      scope :spots_by_exact, lambda {|term|   
+        select(column_names.map{|col_name|"#{table_name}.#{col_name}"}.concat ["unaccent(name) as exact_spot"]).where("unaccent(?) ilike unaccent('%' || name || '%')",term)
+      }
+
+      def self.spots_by_trigram(term)
+        result = term.transliterate.split_pairs(/ |\/|-/).map {|ttt| fuzzy_match_by_trigram(ttt) }.flatten
         # filter out the weaker matches, allow ties for first place
         max = result.map(&:trigram_rank_f).max 
         result.select {|v| v.trigram_rank_f >= max}
       end
+
       def self.spots_by_tsearch(term)
         term_safe = ActiveRecord::Base.sanitize(term.gsub(/\\|\/|-|\?/, ' '))
         rewrite_query = "querytree(ts_rewrite(plainto_tsquery('simple',#{term_safe}),$$select original_tsquery,substitution_tsquery from varietal_aliases WHERE plainto_tsquery('simple',#{term_safe}) @>original_tsquery$$))"
@@ -49,7 +54,7 @@ module SearchContext
         result.select {|v| v.rank_f >= max * 0.50}
       end
       def self.spots(term)
-        spots_by_trigram(term).concat(spots_by_tsearch(term)).uniq
+        spots_by_exact(term).concat(spots_by_trigram(term)).concat(spots_by_tsearch(term)).uniq
       end
     end
     
@@ -62,7 +67,10 @@ module SearchContext
     end
     # for the last spots by tsearch command. returns the original word it matched against
     def spot
-      if respond_to?(:trigram_spot)
+      case
+      when respond_to?(:exact_spot)
+        exact_spot
+      when respond_to?(:trigram_spot)
        trigram_spot
       else
        tsearch_spot
