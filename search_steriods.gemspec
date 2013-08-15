@@ -5,11 +5,11 @@ require "search_context/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "search_context"
+  s.name        = "search_steroids"
   s.version     = SearchContext::VERSION
   s.authors     = ["Rob Mathews"]
   s.email       = ["TODO: Your email"]
-  s.homepage    = "https://github.com/robmathews/search_context/master/README.md"
+  s.homepage    = "https://github.com/robmathews/search_steroids/master/README.md"
   s.summary     = "TODO: Summary of SearchContext."
   s.description = "maintain a table of search terms indexed by a trigram index, for use fixing spelling errors and enhancing search"
 

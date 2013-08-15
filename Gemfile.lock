@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    search_context (0.0.1)
+    search_steroids (0.0.1)
       pg (~> 0.14.1)
       rails (~> 3.2.13)
 
@@ -69,7 +69,7 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     method_source (0.8.1)
-    mime-types (1.23)
+    mime-types (1.24)
     multi_json (1.7.7)
     pg (0.14.1)
     polyglot (0.3.3)
@@ -139,5 +139,5 @@ DEPENDENCIES
   pg (~> 0.14.1)
   pry
   rspec-rails
-  search_context!
+  search_steroids!
   test-unit
