@@ -19,7 +19,7 @@ class SearchContextGenerator < Rails::Generators::Base
     migrate_if_needed "install_migration.rb", "db/migrate/install_trigram_extension.rb"
     template 'model.rb', "app/models/#{model_file_name}.rb"
     template 'alias.rb', "app/models/#{aliases_file_name}.rb"
-    template 'migration_helper.rb', "db/migrate/migration_helper.rb"
+    template 'migration_helper.rb', "db/migration_helper.rb"
     migrate_if_needed "create_model_migration.rb", "db/migrate/create_#{table_name}.rb"
     migrate_if_needed "create_search_config_migration.rb", "db/migrate/add_#{search_config_name}.rb"
     migrate_if_needed "add_context_migration.rb", "db/migrate/add_trigram_index_to_#{context}.rb"
