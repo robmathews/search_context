@@ -50,7 +50,7 @@ class Author < ActiveRecord::Base
 end
 ```
 context is the name of the table to use, multiple models can share the same table
-fields are the database columns to use. Non-database columns are not supported
+fields are the database columns to use. Non-database columns are not supported, but you can pass in the name of a method on the class that returns an array of search terms instead of using a list of database columns
 granularity is either "broken_by_word" or "complete". This means that we'll either index by each word in the result, or keep them complete. Default is broken_by_word, which usually makes the most sense. Complete might be more useful for book titles ...
 
 ## To use
@@ -89,10 +89,10 @@ This will generate 3 migrations, which you should review before using:
 
 ## Integration with tsearch
 
-This scope can be integrated with the tsearch query like this: 
-    Author.where("to_tsquery(?,?) @@ context_search_terms",SearchTerm.search_config, SearchTerm.fuzzy_match_as_tsvector('Charlie'))
-    
-This is only an example of what you can do, really you'll be wanting to author something tsearch specific pretty quickly using features like weighting. Therefore this gems approach is only to sketch an outline and provide useful functions and tools for you to extend.
+This scope can be integrated with the tsearch query like this:
+    Author.fuzzy_match('James Blish')
+
+Look in the search context class for the Query module (ie, in search_context.rb in this example) for the implementation of fuzzy_match for your class. This is only an example of what you can do, really you'll be wanting to author something tsearch specific pretty quickly using features like weighting. Therefore this gems approach is only to sketch an outline and provide useful functions and tools for you to extend.
 
 ## Generation of scopes in a module for each Context
 
