@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Rob Mathews"]
   s.email       = ["rob@justsoftwareconsulting.com"]
   s.homepage    = "https://github.com/robmathews/search_steroids/master/README.md"
-  s.summary     = "TODO: Summary of SearchContext."
+  s.summary     = "SearchSteroids has defines tsearch+trigram functions for postgres that help with FTS and spelling correction"
   s.description = "maintain a table of search terms indexed by a trigram index, for use fixing spelling errors and enhancing search"
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
