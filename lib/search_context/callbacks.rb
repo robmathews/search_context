@@ -45,7 +45,9 @@ module SearchContext
            eval <<-EOS
           class_eval do
             def #{cache_proc}
-              #{var} = #{calculate_proc}
+              # guard against after_find callback being called with self as the PgClass, not the instance.
+              # which I don't understand.
+              #{var} = #{calculate_proc} if self.class.name == #{self.name}.name
               true
             end
             def #{create_proc}
