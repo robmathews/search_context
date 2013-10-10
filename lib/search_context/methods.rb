@@ -98,7 +98,7 @@ module SearchContext
       end
       def add_terms(*terms)
         where(:name=>terms).update_all("count=count+1")
-        new_terms = terms - self.where(:name=>terms).pluck(:name)
+        new_terms = terms - self.where(:name=>terms).map(&:name)
         new_terms.each {|name| self.create!(:count=>1,:name=>name)}
       end
       # default definition of similarity, you can override this in the class if needed
